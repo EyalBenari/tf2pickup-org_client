@@ -8,7 +8,7 @@ import {
   ElementRef,
   OnDestroy,
 } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormControl } from '@angular/forms';
 import { ConfigurationService } from '@app/configuration/configuration.service';
 import { race, Subject } from 'rxjs';
 import { MDCSwitch } from '@material/switch';
@@ -19,6 +19,9 @@ import { Location } from '@angular/common';
 import { map, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute, Data } from '@angular/router';
 import { PlayerRestrictions } from './player-restrictions';
+import { queueClassNames, queueLoading } from '@app/queue/queue.selectors';
+import { Store } from '@ngrx/store';
+import { Tf2ClassName } from '@app/shared/models/tf2-class-name';
 
 @Component({
   selector: 'app-player-restrictions',
@@ -29,11 +32,16 @@ import { PlayerRestrictions } from './player-restrictions';
 export class PlayerRestrictionsComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
+  minimumSkillThresholdsForm = this.formBuilder.group<
+    Partial<Record<Tf2ClassName, FormControl<number>>>
+  >({});
   form = this.formBuilder.group({
     etf2lAccountRequired: [false],
     minimumTf2InGameHours: [0],
     denyPlayersWithNoSkillAssigned: [false],
   });
+  queueClasses = this.store.select(queueClassNames);
+  queueLoading = this.store.select(queueLoading);
 
   @ViewChild('etf2lAccountRequiredSwitch')
   etf2lAccountRequiredControl: ElementRef;
@@ -52,6 +60,7 @@ export class PlayerRestrictionsComponent
     private overlay: Overlay,
     private location: Location,
     private route: ActivatedRoute,
+    private store: Store,
   ) {}
 
   ngOnInit() {
@@ -65,12 +74,14 @@ export class PlayerRestrictionsComponent
           etf2lAccountRequired,
           minimumTf2InGameHours,
           denyPlayersWithNoSkillAssigned,
+          minimumSkillThresholds,
         }) => {
           this.form.patchValue({
             etf2lAccountRequired,
             minimumTf2InGameHours,
             denyPlayersWithNoSkillAssigned,
           });
+          this.minimumSkillThresholdsForm.patchValue(minimumSkillThresholds);
           this.changeDetector.markForCheck();
         },
       );
@@ -107,6 +118,10 @@ export class PlayerRestrictionsComponent
           key: 'queue.deny_players_with_no_skill_assigned',
           value: this.denyPlayersWithNoSkillAssigned,
         },
+        {
+          key: 'queue.minimum_skill_thresholds',
+          value: this.minimumSkillThresholds,
+        },
       )
       .subscribe(() => this.location.back());
   }
@@ -123,6 +138,12 @@ export class PlayerRestrictionsComponent
     this.form.patchValue({
       denyPlayersWithNoSkillAssigned: !this.denyPlayersWithNoSkillAssigned,
     });
+    this.form.markAsDirty();
+    this.changeDetector.markForCheck();
+  }
+
+  updateSkillThreshold() {
+    console.log('ASDASD');
     this.form.markAsDirty();
     this.changeDetector.markForCheck();
   }
@@ -154,5 +175,9 @@ export class PlayerRestrictionsComponent
 
   get denyPlayersWithNoSkillAssigned(): boolean {
     return this.form.get('denyPlayersWithNoSkillAssigned').value;
+  }
+
+  get minimumSkillThresholds(): Partial<Record<Tf2ClassName, number>> {
+    return this.minimumSkillThresholdsForm.value;
   }
 }

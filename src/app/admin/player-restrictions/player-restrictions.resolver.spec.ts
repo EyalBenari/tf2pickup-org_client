@@ -57,6 +57,7 @@ describe('PlayerRestrictionsResolver', () => {
           etf2lAccountRequired: true,
           minimumTf2InGameHours: 450,
           denyPlayersWithNoSkillAssigned: false,
+          minimumSkillThresholds: { scout: 100 },
         });
         done();
       });
@@ -65,6 +66,7 @@ describe('PlayerRestrictionsResolver', () => {
         'players.etf2l_account_required': true,
         'players.minimum_in_game_hours': 450,
         'queue.deny_players_with_no_skill_assigned': false,
+        minimumSkillThresholds: { scout: 100 },
       });
     });
   });

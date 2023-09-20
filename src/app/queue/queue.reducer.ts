@@ -21,9 +21,11 @@ import { QueueConfig } from './models/queue-config';
 export interface State extends Queue {
   mapVote?: string;
   preReady: boolean;
+  loading: boolean;
 }
 
 export const initialState: State = {
+  loading: true,
   config: environment.entryQueue.config as QueueConfig,
   slots: environment.entryQueue.slots,
   state: 'loading',

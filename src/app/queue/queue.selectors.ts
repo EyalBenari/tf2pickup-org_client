@@ -4,6 +4,10 @@ import { currentPlayer } from '@app/profile/profile.selectors';
 
 const queueFeature = createFeatureSelector<State>('queue');
 
+export const queueLoading = createSelector(
+  queueFeature,
+  feature => feature.loading,
+);
 export const queueConfig = createSelector(
   queueFeature,
   feature => feature.config,
@@ -11,6 +15,9 @@ export const queueConfig = createSelector(
 export const queueClasses = createSelector(
   queueConfig,
   config => config?.classes,
+);
+export const queueClassNames = createSelector(queueClasses, classes =>
+  classes.map(gameClass => gameClass.name),
 );
 export const queueState = createSelector(
   queueFeature,
